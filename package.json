@@ -1,0 +1,30 @@
+{
+  "name": "tokyo-ev-rental",
+  "version": "1.0.0",
+  "description": "Premium Tesla Model 3 & Model Y rental website for Tokyo",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required for this project'"
+  },
+  "keywords": [
+    "tesla",
+    "ev",
+    "rental",
+    "tokyo",
+    "electric-vehicle"
+  ],
+  "author": "Tokyo EV Rental",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "googleapis": "^128.0.0",
+    "nodemailer": "^6.9.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
