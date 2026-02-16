@@ -1,5 +1,29 @@
 // Pricing and Configuration
 export const config = {
+  // Supabase configuration
+  supabase: {
+    url: 'https://qjaaroailyblgntedppj.supabase.co',
+    anonKey: 'sb_publishable_rnEgmJXPOA0HnhgGXiPCBA_aLc-HqWE'
+  },
+  
+  // Vehicle configuration with Supabase car IDs
+  vehicles: {
+    model3: {
+      id: 1, // Matches Supabase cars table
+      name: 'Tesla Model 3',
+      dailyRate: 12000,
+      insuranceFee: 1500,
+      minDays: 1
+    },
+    modelY: {
+      id: 2, // Matches Supabase cars table
+      name: 'Tesla Model Y',
+      dailyRate: 15000,
+      insuranceFee: 2000,
+      minDays: 1
+    }
+  },
+  
   pricing: {
     model3: {
       name: 'Tesla Model 3',

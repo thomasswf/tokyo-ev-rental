@@ -976,47 +976,53 @@ async function submitBooking(formData) {
     document.getElementById('step3-error').classList.add('hidden');
     
     // Generate booking ID
-    const bookingId = generateBookingId();
+    const bookingId = window.SupabaseAPI.generateBookingId();
     state.bookingData.bookingId = bookingId;
     state.bookingData.customer = formData;
     
-    // Prepare booking data
-    const bookingRecord = {
+    // Get the selected car ID from config
+    const vehicleConfig = state.bookingData.vehicle === 'model3' 
+      ? config.vehicles.model3 
+      : config.vehicles.modelY;
+    
+    // Calculate dates and days
+    const pickupDate = state.bookingData.pickupDate;
+    const returnDate = state.bookingData.returnDate;
+    const days = Math.ceil((new Date(returnDate) - new Date(pickupDate)) / (1000 * 60 * 60 * 24));
+    
+    // Prepare booking data for Supabase
+    const bookingData = {
       booking_id: bookingId,
-      created_at: new Date().toISOString(),
-      car_model: state.bookingData.vehicle,
-      pickup_datetime: `${state.bookingData.pickupDate} ${state.bookingData.pickupTime}`,
-      return_datetime: `${state.bookingData.returnDate} ${state.bookingData.returnTime}`,
-      location: 'Nippori',
-      addons: state.bookingData.addons.join(', '),
-      price_total: state.bookingData.pricing.total,
-      price_breakdown: JSON.stringify(state.bookingData.pricing.breakdown),
+      car_id: state.bookingData.vehicle === 'model3' ? 1 : 2, // Default car IDs
       customer_name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      nationality: formData.nationality,
-      license_type: formData.licenseType,
-      consent_timestamp: new Date().toISOString(),
-      status: 'submitted'
+      customer_email: formData.email,
+      customer_phone: formData.phone,
+      customer_address: formData.nationality, // Store nationality as address for now
+      pickup_date: pickupDate,
+      return_date: returnDate,
+      total_days: days,
+      base_price: state.bookingData.pricing.breakdown.find(b => b.label.includes('Base')).amount,
+      insurance_cost: state.bookingData.pricing.breakdown.find(b => b.label.includes('Insurance')).amount,
+      optional_insurance: state.bookingData.addons.includes('Optional CDW'),
+      baby_seat: state.bookingData.addons.includes('Baby Seat'),
+      baby_seat_cost: state.bookingData.addons.includes('Baby Seat') 
+        ? state.bookingData.pricing.breakdown.find(b => b.label.includes('Baby'))?.amount || 0 
+        : 0,
+      wifi: state.bookingData.addons.includes('Pocket WiFi'),
+      wifi_cost: state.bookingData.addons.includes('Pocket WiFi') 
+        ? state.bookingData.pricing.breakdown.find(b => b.label.includes('WiFi'))?.amount || 0 
+        : 0,
+      etc_card: state.bookingData.addons.includes('ETC Card'),
+      etc_card_cost: state.bookingData.addons.includes('ETC Card') 
+        ? state.bookingData.pricing.breakdown.find(b => b.label.includes('ETC'))?.amount || 0 
+        : 0,
+      total_cost: state.bookingData.pricing.total,
+      special_requests: formData.specialRequests || null
     };
     
-    // Submit to backend API
-    const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
-    const response = await fetch(`${apiUrl}/api/bookings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(bookingRecord)
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Booking submission failed');
-    }
-    
-    const result = await response.json();
-    console.log('Booking confirmed:', result);
+    // Save to Supabase database (booking_requests table)
+    const result = await window.SupabaseAPI.createBookingRequest(bookingData);
+    console.log('Booking request created:', result);
     
     // Navigate to confirmation
     navigateTo('confirmation');

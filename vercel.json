@@ -3,49 +3,45 @@
   "name": "tokyo-ev-rental",
   "builds": [
     {
-      "src": "server.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "index.html",
+      "src": "*.html",
       "use": "@vercel/static"
     },
     {
-      "src": "app.js",
+      "src": "*.js",
       "use": "@vercel/static"
     },
     {
-      "src": "config.js",
+      "src": "*.xml",
       "use": "@vercel/static"
     },
     {
-      "src": "sitemap.xml",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "robots.txt",
+      "src": "*.txt",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/bookings",
-      "dest": "server.js"
-    },
-    {
-      "src": "/api/bookings/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/api/check-availability",
-      "dest": "server.js"
-    },
-    {
       "src": "/(.*)",
       "dest": "/$1"
     }
   ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
 }
